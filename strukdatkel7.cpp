@@ -20,19 +20,21 @@ void tambahBuku(vector<Buku> &stokbuku) {
     cin >> buku.kategori;
     cout << "Masukkan genre buku: ";
     cin >> buku.genre;
+    cin.ignore();  // Mengabaikan karakter newline yang tersisa di buffer    
     cout << "Masukkan judul buku: ";
-    cin >> buku.judul;
+    getline(cin, buku.judul);
     cout << "Masukkan penulis buku: ";
     cin >> buku.penulis;
+    cin.ignore();  // Mengabaikan karakter newline yang tersisa di buffer 
     cout << "Masukkan penerbit buku: ";
-    cin >> buku.penerbit;
+    getline(cin, buku.penerbit);
     cout << "Masukkan harga buku: Rp";
     cin >> buku.harga;
     cout << "Masukkan stok buku: ";
     cin >> buku.stok;
 
     stokbuku.push_back(buku);
-    cout << "Buku " << buku.judul << " sebanyak " << buku.stok << " berhasil ditambahkan ke dalam stok buku!\n";
+    cout << "Buku " << buku.judul << " sebanyak " << buku.stok << " buah berhasil ditambahkan ke dalam stok buku!\n\n";
 }
 
 // Fungsi untuk mencari buku
@@ -45,7 +47,7 @@ int main() {
     
     do {
         cout << "Silakan pilih menu yang tersedia:\n";
-        cout << "1. Tambah buku\n"; // admi
+        cout << "1. Tambah buku\n"; // admin
         cout << "2. Pembaruan stok buku setelah transaksi\n"; // admin, nambah stok
         cout << "3. Cari buku\n";
         cout << "4. Menampilkan seluruh stok buku\n"; // customer dan admin
