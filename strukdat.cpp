@@ -1,106 +1,191 @@
 #include <iostream>
 #include <vector>
-#include <string>
+using namespace std;
 
-class Barang {
-public:
-    std::string nama;
-    int kuantitas;
-
-    Barang(std::string n, int k) : nama(n), kuantitas(k) {}
+// Struktur data untuk menyimpan data barang
+struct Buku {
+    string kategori;
+    string genre;
+    string judul;
+    string penulis;
+    string penerbit;
+    int harga;
+    int stok;
 };
 
-class Keranjang {
-private:
-    std::vector<Barang> items;
+struct Keranjang {
+    Buku buku;
+    int jumlah;
+};
 
-public:
-    void tambahBarang(std::string nama, int kuantitas) {
-        items.push_back(Barang(nama, kuantitas));
-    }
+// Fungsi untuk menambahkan barang baru ke dalam sistem stok barang
+void tambahBuku(vector<Buku> &stokbuku) {
+    Buku buku;
+    cout << "\tMasukkan kategori buku: ";
+    cin >> buku.kategori;
+    cout << "\tMasukkan genre buku: ";
+    cin >> buku.genre;
+    cin.ignore();  // Mengabaikan karakter newline yang tersisa di buffer    
+    cout << "\tMasukkan judul buku: ";
+    getline(cin, buku.judul);
+    cout << "\tMasukkan penulis buku: ";
+    cin >> buku.penulis;
+    cin.ignore();  // Mengabaikan karakter newline yang tersisa di buffer 
+    cout << "\tMasukkan penerbit buku: ";
+    getline(cin, buku.penerbit);
+    cout << "\tMasukkan harga buku: Rp";
+    cin >> buku.harga;
+    cout << "\tMasukkan stok buku: ";
+    cin >> buku.stok;
+    stokbuku.push_back(buku);
+    cout << "Buku " << buku.judul << " sebanyak " << buku.stok << " buah berhasil ditambahkan ke dalam stok buku!\n";
+    cout << "=============================================\n";
+}
 
-    void tampilkanKeranjang() {
-        std::cout << "Isi Keranjang:\n";
-        for (int i = 0; i < items.size(); i++) {
-            std::cout << i + 1 << ". " << items[i].nama << " (" << items[i].kuantitas << ")\n";
+// Fungsi untuk menambahkan barang ke keranjang
+void tambahKeKeranjang(vector<Buku> &stokbuku, vector<Keranjang> &keranjang) {
+    string judul;
+    int jumlah;
+    cout << "\tMasukkan judul buku yang ingin ditambahkan ke keranjang: ";
+    cin.ignore();
+    getline(cin, judul);
+    cout << "\tMasukkan jumlah buku yang ingin ditambahkan: ";
+    cin >> jumlah;
+
+    for (int i = 0; i < stokbuku.size(); i++) {
+        if (stokbuku[i].judul == judul) {
+            if (stokbuku[i].stok >= jumlah) {
+                Keranjang k;
+                k.buku = stokbuku[i];
+                k.jumlah = jumlah;
+                keranjang.push_back(k);
+                stokbuku[i].stok -= jumlah;
+                cout << "Buku " << judul << " sebanyak " << jumlah << " buah berhasil ditambahkan ke keranjang!\n";
+            } else {
+                cout << "Stok buku tidak cukup!\n";
+            }
+            return;
         }
     }
 
-    void checkout() {
-        std::cout << "Anda telah melakukan checkout dengan item berikut:\n";
-        tampilkanKeranjang();
-        items.clear();
-        std::cout << "Terima kasih telah berbelanja!\n";
+    cout << "Buku dengan judul " << judul << " tidak ditemukan!\n";
+}
+
+// Fungsi untuk menampilkan isi keranjang
+void tampilkanKeranjang(vector<Keranjang> &keranjang) {
+    cout << "Isi Keranjang:\n";
+    for (int i = 0; i < keranjang.size(); i++) {
+        cout << i + 1 << ". " << keranjang[i].buku.judul << " (" << keranjang[i].jumlah << ")\n";
     }
-};
+}
+
+// Fungsi untuk melakukan checkout
+void checkout(vector<Keranjang> &keranjang) {
+    cout << "Anda telah melakukan checkout dengan item berikut:\n";
+    tampilkanKeranjang(keranjang);
+    keranjang.clear();
+    cout << "Terima kasih telah berbelanja!\n";
+}
 
 int main() {
-    Keranjang keranjang;
-    std::string nama;
-    int kuantitas;
-    char pilihan;
-    char user;
-
-    std::cout << "Apakah Anda Admin atau Pelanggan? (A/P): ";
-    std::cin >> user;
-
-    if (user == 'A') {
-        do {
-            std::cout << "Menu Admin:\n";
-            std::cout << "1. Tambah barang ke keranjang\n";
-            std::cout << "2. Tampilkan isi keranjang\n";
-            std::cout << "3. Checkout\n";
-            std::cout << "4. Keluar\n";
-            std::cout << "Masukkan pilihan Anda: ";
-            std::cin >> pilihan;
-
-            switch (pilihan) {
-                case '1':
-                    std::cout << "Masukkan nama barang: ";
-                    std::cin >> nama;
-                    std::cout << "Masukkan kuantitas barang: ";
-                    std::cin >> kuantitas;
-                    keranjang.tambahBarang(nama, kuantitas);
+    vector<Buku> stokbuku;
+    vector<Keranjang> keranjang;
+    int pilihan;
+    int login;
+    do {
+        cout << "=============================================\n";
+        cout << "Selamat datang di sistem manajemen stok buku\n";
+        cout << "=============================================\n";
+        cout << "Masuk sebagai\n";
+        cout << "1. Admin\n";
+        cout << "2. Customer\n";
+        cout << "3. Keluar\n";
+        cout << "Pilihan: ";
+        cin >> login;
+        switch (login) {
+        case 1:
+            cout << "Anda masuk sebagai Admin!\n";
+            cout << "=============================================\n\n";
+            do {
+                cout << "=============================================\n";
+                cout << "Silakan pilih menu yang tersedia:\n";
+                cout << "=============================================\n";
+                cout << "1. Tambah buku\n"; // admin
+                cout << "2. Pembaruan stok buku setelah transaksi\n"; // admin, nambah stok
+                cout << "3. Cari buku\n";
+                cout << "4. Menampilkan seluruh stok buku\n"; // customer dan admin
+                cout << "5. Kembali\n"; // keluar dari menu admin
+                cout << "Pilihan: ";
+                cin >> pilihan;
+                switch (pilihan) {
+                case 1:
+                    // Tambah buku
+                    tambahBuku(stokbuku);
                     break;
-                case '2':
-                    keranjang.tampilkanKeranjang();
+                case 2:
+                    // Pembaruan stok buku setelah transaksi
+                    cout << "Masukkan judul buku yang akan diupdate: ";
                     break;
-                case '3':
-                    keranjang.checkout();
+                case 3:
+                    // Cari buku
+                    cout << "Cari buku berdasarkan: \n";
+                    cout << "1. Kategori\n";
+                    cout << "2. Genre\n";
+                    cout << "3. Judul\n";
+                    cout << "4. Penulis\n";
+                    cout << "5. Range Harga\n";
+                    cout << "6. Kembali\n";
                     break;
-                case '4':
-                    std::cout << "Terima kasih telah menggunakan program ini.\n";
+                case 4:
+                    // Menampilkan seluruh stok buku
+                    cout << "Menampilkan seluruh stok buku";
                     break;
-                default:
-                    std::cout << "Pilihan tidak valid. Silakan coba lagi.\n";
-            }
-        } while (pilihan != '4');
-    } else if (user == 'P') {
-        do {
-            std::cout << "Menu Pelanggan:\n";
-            std::cout << "1. Tampilkan isi keranjang\n";
-            std::cout << "2. Checkout\n";
-            std::cout << "3. Keluar\n";
-            std::cout << "Masukkan pilihan Anda: ";
-            std::cin >> pilihan;
-
-            switch (pilihan) {
-                case '1':
-                    keranjang.tampilkanKeranjang();
-                    break;
-                case '2':
-                    keranjang.checkout();
-                    break;
-                case '3':
-                    std::cout << "Terima kasih telah menggunakan program ini.\n";
+                case 5:
+                    // Kembali ke menu utama
                     break;
                 default:
-                    std::cout << "Pilihan tidak valid. Silakan coba lagi.\n";
-            }
-        } while (pilihan != '3');
-    } else {
-        std::cout << "Pilihan tidak valid. Silakan coba lagi.\n";
-    }
-
+                    cout << "Menu tidak tersedia";
+                }
+            } while (pilihan != 5);
+            break;
+        case 2:
+            cout << "Anda masuk sebagai Customer!\n\n";
+            cout << "=============================================\n";
+            do {
+                cout << "=============================================\n";
+                cout << "Silakan pilih menu yang tersedia:\n";
+                cout << "=============================================\n";
+                cout << "1. Tambah barang ke keranjang\n";
+                cout << "2. Tampilkan isi keranjang\n";
+                cout << "3. Checkout\n";
+                cout << "4. Kembali\n";
+                cout << "Pilihan: ";
+                cin >> pilihan;
+                switch (pilihan) {
+                case 1:
+                    // Tambah barang ke keranjang
+                    tambahKeKeranjang(stokbuku, keranjang);
+                    break;
+                case 2:
+                    // Tampilkan isi keranjang
+                    tampilkanKeranjang(keranjang);
+                    break;
+                case 3:
+                    // Checkout
+                    checkout(keranjang);
+                    break;
+                case 4:
+                    // Kembali ke menu utama
+                    break;
+                default:
+                    cout << "Menu tidak tersedia";
+                }
+            } while (pilihan != 4);
+            break;
+        default:
+            cout << "Menu tidak tersedia!\n\n";
+            break;
+        }
+    } while (login != 3);
     return 0;
 }
