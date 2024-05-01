@@ -1,0 +1,6 @@
+Novel	Fiksi	The Midnight Library	Matt Haig	PT. Gramedia	84000	34
+Komik	Action	Mob Psycho 100	One	Elex Media	32000	42
+Novel	Misteri	Malice	Keigo Higashino	PT. Gramedia	74000	20
+Biografi	Sejarah	Ismail Marzuki	Ninok Leksono	Kompas	45000	16
+Komik	Komedi	Hai Miiko!	Eriko Ono	m&c!	30000	28
+Novel	Misteri	The Newcomer	Keigo Higashino	PT. Gramedia	74000	37
