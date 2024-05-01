@@ -39,10 +39,27 @@ void tambahBuku(vector<Buku> &stokbuku) {
     cout << "=============================================\n";
 }
 
-// Fungsi untuk mencari buku
+// Fungsi untuk mencari buku berdasarkan kategori
+
 
 int main() {
     vector<Buku> stokbuku;
+    // Menambahkan buku dari input file
+    ifstream inputFile("default stock.txt");
+    Buku buku;
+
+    while (getline(inputFile, buku.kategori, '\t') &&
+           getline(inputFile, buku.genre, '\t') &&
+           getline(inputFile, buku.judul, '\t') &&
+           getline(inputFile, buku.penulis, '\t') &&
+           getline(inputFile, buku.penerbit, '\t') &&
+           inputFile >> buku.harga >> buku.stok) {
+        inputFile.ignore(); // Mengabaikan karakter newline yang tersisa di buffer
+        stokbuku.push_back(buku);
+    }
+
+    inputFile.close();
+
     int pilihan;
     int login;
 
@@ -88,11 +105,10 @@ int main() {
                             // Cari buku
                             cout << "Cari buku berdasarkan: \n";
                             cout << "1. Kategori\n";
-                            cout << "2. Genre\n";
-                            cout << "3. Judul\n";
-                            cout << "4. Penulis\n";
-                            cout << "5. Range Harga\n";
-                            cout << "6. Kembali\n";
+                            cout << "2. Judul\n";
+                            cout << "3. Penulis\n";
+                            cout << "4. Range Harga\n";
+                            cout << "5. Kembali\n";
                             break;
                         case 4:
                             // Menampilkan seluruh stok buku
@@ -102,16 +118,17 @@ int main() {
                             // Kembali ke menu utama
                             break;
                         default:
-                            cout << "Menu tidak tersedia";
+                            cout << "Menu tidak tersedia\n";
                     }
                 } while (pilihan != 5);
                 break;
+
             case 2:
                 cout << "Anda masuk sebagai Customer!\n\n";
                 cout << "=============================================\n";
                 break;
             default:
-                cout << "Menu tidak tersedia!\n\n";
+                
                 break;
         }    
     } while (login != 3);
