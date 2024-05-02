@@ -41,11 +41,11 @@ void init() { // Inisialisasi hash table
 int keyToValue(string key) { // Mengubah key menjadi value
     int n = key.length();
     int i;
-    int radix128 = 0;
+    int radix8 = 0;
     for (i = 0; i < n; i++) {
-        radix128 += key[n - 1 - i] * pow(128, i);
+        radix8 += key[n - 1 - i] * pow(8, i);
     }
-    return radix128;
+    return radix8;
 }
 
 void insertHash(string key, Buku* buku) { // Memasukkan data ke dalam hash table
@@ -142,9 +142,9 @@ void tambahBuku(vector<Buku> &stokbuku) {
     cin >> buku.stok;
 
     stokbuku.push_back(buku); // Menambahkan buku ke dalam stok buku
-    // insertHash(buku.kategori, &stokbuku.back()); // Menambahkan buku ke dalam hash table dengan key kategori
-    // insertHash(buku.judul, &stokbuku.back()); // Menambahkan buku ke dalam hash table dengan key judul
-    // insertHash(buku.penulis, &stokbuku.back()); // Menambahkan buku ke dalam hash table dengan key penulis
+    insertHash(buku.kategori, &stokbuku.back()); // Menambahkan buku ke dalam hash table dengan key kategori
+    insertHash(buku.judul, &stokbuku.back()); // Menambahkan buku ke dalam hash table dengan key judul
+    insertHash(buku.penulis, &stokbuku.back()); // Menambahkan buku ke dalam hash table dengan key penulis
 
     cout << "Buku " << buku.judul << " sebanyak " << buku.stok << " buah berhasil ditambahkan ke dalam stok buku!\n";
     cout << "=============================================\n";
@@ -167,9 +167,9 @@ int main() {
            inputFile >> buku.harga >> buku.stok) {
         inputFile.ignore(); // Mengabaikan karakter newline yang tersisa di buffer
         stokbuku.push_back(buku);
-        // insertHash(buku.kategori, &stokbuku.back()); // Menambahkan buku ke dalam hash table dengan key kategori
-        // insertHash(buku.judul, &stokbuku.back()); // Menambahkan buku ke dalam hash table dengan key judul
-        // insertHash(buku.penulis, &stokbuku.back()); // Menambahkan buku ke dalam hash table dengan key penulis
+        insertHash(buku.kategori, &stokbuku.back()); // Menambahkan buku ke dalam hash table dengan key kategori
+        insertHash(buku.judul, &stokbuku.back()); // Menambahkan buku ke dalam hash table dengan key judul
+        insertHash(buku.penulis, &stokbuku.back()); // Menambahkan buku ke dalam hash table dengan key penulis
     }
 
     inputFile.close();
