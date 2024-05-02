@@ -3,13 +3,12 @@
 #include <fstream>
 #include <string>
 #include <math.h>
+#include <unordered_map>
 using namespace std;
 
-#define size 1000
-#define h(k) k % size
-
 // Struct untuk menyimpan data barang
-struct Buku {
+struct Buku
+{
     string kategori;
     string genre;
     string judul;
@@ -19,159 +18,91 @@ struct Buku {
     int stok;
 };
 
-// Struct untuk menyimpan data key dan isinya dalam hash table
-struct NodeHash {
-    string key;
-    Buku* buku;
-    NodeHash* next;
-};
-
-// Membuat tiga hash table terpisah untuk kategori, judul, dan penulis
-struct NodeHash* chainKategori[size];
-struct NodeHash* chainJudul[size];
-struct NodeHash* chainPenulis[size];
-
-// Menginisialisasi ketiga hash table
-void init() {
-    int i;
-    for (i = 0; i < size; i++) {
-        chainKategori[i] = NULL;
-        chainJudul[i] = NULL;
-        chainPenulis[i] = NULL;
-    }
-}
-
-int keyToValue(string key) { // Mengubah key menjadi value
-    int n = key.length();
-    int i;
-    int radix8 = 0;
-    for (i = 0; i < n; i++) {
-        radix8 += key[n - 1 - i] * pow(8, i);
-    }
-    return radix8;
-}
-
-void insertHash(string key, Buku* buku, NodeHash* chain[]) { // Memasukkan data ke dalam hash table
-    int idx = h(keyToValue(key));
-
-    if (chain[idx] == NULL) {
-        // Jika tidak ada data di indeks hash tersebut, langsung masukkan
-        NodeHash* newNode = new NodeHash;
-        newNode->key = key;
-        newNode->buku = buku;
-        newNode->next = NULL;
-        chain[idx] = newNode;
-    } else {
-        // Jika ada data di indeks hash tersebut, tambahkan ke dalam linked list
-        NodeHash* temp = chain[idx];
-        while (temp->next) {
-            temp = temp->next;
-        }
-
-        NodeHash* newNode = new NodeHash;
-        newNode->key = key;
-        newNode->buku = buku;
-        newNode->next = NULL;
-        temp->next = newNode;
-    }
-}
-
-NodeHash* searchHash(string key, NodeHash* chain[]) { // Mencari data berdasarkan dalam hash table
-    int idx = h(keyToValue(key));
-    NodeHash* temp = chain[idx];
-    while (temp != NULL) {
-        if (temp->key == key) {
-            return temp;
-        }
-        temp = temp->next;
-    }
-    return NULL;
-}
-
-void updateHash(string key, int stok,  NodeHash* chain[]) { // Mengupdate stok buku dalam hash table
-    NodeHash* temp = searchHash(key, chain);
-    if (temp != NULL) {
-        temp->buku->stok = stok;
-    }
-}
-
-void deleteHash(string key,  NodeHash* chain[]) { // Menghapus data dari hash table
-    int idx = h(keyToValue(key));
-
-    NodeHash* temp = chain[idx];
-    NodeHash* prev = temp;
-
-    while (temp != NULL && temp->key != key) { // Mencari key yang akan dihapus
-        prev = temp;
-        temp = temp->next;
-    }
-
-    if (temp == NULL) { // Jika key tidak ditemukan
-        return;
-    }
-
-    if (prev == NULL) { // Jika node yang akan dihapus berada di head
-        chain[idx] = temp->next;
-    } else {
-        prev->next = temp->next;
-    }
-
-    delete temp;
+// Fungsi untuk menambahkan barang ke dalam unordered_map
+void tambahBukuMap(unordered_map<string, vector<Buku>>& kumpulanKategori, unordered_map<string, vector<Buku>>& kumpulanPenulis, const Buku& buku)
+{
+    kumpulanKategori[buku.kategori].push_back(buku);
+    kumpulanPenulis[buku.penulis].push_back(buku);
 }
 
 // Fungsi untuk menambahkan barang baru ke dalam sistem stok barang
-void tambahBuku(vector<Buku> &stokbuku,  NodeHash* chainKategori[], NodeHash* chainJudul[], NodeHash* chainPenulis[]) {
-    Buku buku;
-    cout << "\tMasukkan kategori buku: ";
-    cin >> buku.kategori;
-    cout << "\tMasukkan genre buku: ";
-    cin >> buku.genre;
-    cin.ignore();  // Mengabaikan karakter newline yang tersisa di buffer    
-    cout << "\tMasukkan judul buku: ";
-    getline(cin, buku.judul);
-    cout << "\tMasukkan penulis buku: ";
-    cin >> buku.penulis;
-    cin.ignore();  // Mengabaikan karakter newline yang tersisa di buffer 
-    cout << "\tMasukkan penerbit buku: ";
-    getline(cin, buku.penerbit);
-    cout << "\tMasukkan harga buku: Rp";
-    cin >> buku.harga;
-    cout << "\tMasukkan stok buku: ";
-    cin >> buku.stok;
+void tambahBuku(vector<Buku>& stokbuku, unordered_map<string, vector<Buku>>& kumpulanKategori, unordered_map<string, vector<Buku>>& kumpulanPenulis, Buku buku, bool fromFile = false)
+{
+    if (!fromFile)
+    {
+        cout << "\tMasukkan kategori buku: ";
+        cin >> buku.kategori;
+        cout << "\tMasukkan genre buku: ";
+        cin >> buku.genre;
+        cin.ignore(); // Mengabaikan karakter newline yang tersisa di buffer
+        cout << "\tMasukkan judul buku: ";
+        getline(cin, buku.judul);
+        cout << "\tMasukkan penulis buku: ";
+        cin >> buku.penulis;
+        cin.ignore(); // Mengabaikan karakter newline yang tersisa di buffer
+        cout << "\tMasukkan penerbit buku: ";
+        getline(cin, buku.penerbit);
+        cout << "\tMasukkan harga buku: Rp";
+        cin >> buku.harga;
+        cout << "\tMasukkan stok buku: ";
+        cin >> buku.stok;
+    }
 
-    stokbuku.push_back(buku); // Menambahkan buku ke dalam stok buku
-    insertHash(buku.kategori, &stokbuku.back(), chainKategori); // Menambahkan buku ke dalam hash table dengan key kategori
-    insertHash(buku.judul, &stokbuku.back(), chainJudul); // Menambahkan buku ke dalam hash table dengan key judul
-    insertHash(buku.penulis, &stokbuku.back(), chainPenulis); // Menambahkan buku ke dalam hash table dengan key penulis
-
-    cout << "Buku " << buku.judul << " sebanyak " << buku.stok << " buah berhasil ditambahkan ke dalam stok buku!\n";
-    cout << "=============================================\n";
+    stokbuku.push_back(buku); // Menambahkan buku ke dalam vektor stokbuku
+    tambahBukuMap(kumpulanKategori, kumpulanPenulis, buku); // Menambahkan buku ke dalam unordered_map
 }
 
-int main() {
+// Fungsi untuk mencari buku berdasarkan kategori atau penulis
+void cariBuku(string cari, unordered_map<string, vector<Buku>>& chain)
+{
+    if (chain.find(cari) != chain.end())
+    {
+        cout << "\nBuku dengan kategori " << cari << " ditemukan!\n";
+        cout << "=============================================\n";
+        for (auto& buku : chain[cari])
+        {
+            cout << "\tJudul: " << buku.judul << endl;
+            cout << "\tPenulis: " << buku.penulis << endl;
+            cout << "\tPenerbit: " << buku.penerbit << endl;
+            cout << "\tHarga: " << buku.harga << endl;
+            cout << "\tStok: " << buku.stok << endl;
+            cout << "=============================================\n";
+        }
+    }
+    else
+    {
+        cout << "Buku tidak ditemukan.\n";
+    }
+}
+
+int main()
+{
     vector<Buku> stokbuku;
+    unordered_map<string, vector<Buku>> kumpulanKategori;
+    unordered_map<string, vector<Buku>> kumpulanPenulis;
+
     // Menambahkan buku dari input file
     ifstream inputFile("defaultstock.txt");
     Buku buku;
 
-    while (getline(inputFile, buku.kategori, '\t') &&
-           getline(inputFile, buku.genre, '\t') &&
-           getline(inputFile, buku.judul, '\t') &&
-           getline(inputFile, buku.penulis, '\t') &&
-           getline(inputFile, buku.penerbit, '\t') &&
-           inputFile >> buku.harga >> buku.stok) {
-        inputFile.ignore(); // Mengabaikan karakter newline yang tersisa di buffer
-        stokbuku.push_back(buku);
-        insertHash(buku.kategori, &stokbuku.back(), chainKategori); // Menambahkan buku ke dalam hash table dengan key kategori
-        insertHash(buku.judul, &stokbuku.back(), chainJudul); // Menambahkan buku ke dalam hash table dengan key judul
-        insertHash(buku.penulis, &stokbuku.back(), chainPenulis); // Menambahkan buku ke dalam hash table dengan key penulis
+    while (getline(inputFile, buku.kategori) &&
+           getline(inputFile, buku.genre) &&
+           getline(inputFile, buku.judul) &&
+           getline(inputFile, buku.penulis) &&
+           getline(inputFile, buku.penerbit) &&
+           inputFile >> buku.harga >> buku.stok)
+    {
+        inputFile.ignore(); // Mengabaikan karakter newline
+        tambahBuku(stokbuku, kumpulanKategori, kumpulanPenulis, buku, true); // Menambahkan buku ke dalam vektor stokbuku dan unordered_map
     }
 
     inputFile.close();
 
-    int pilihan, login;
+    int pilihan, login, pilihanCari;
+    string kategori, judul, penulis;
 
-    do {
+    do
+    {
         cout << "=============================================\n";
         cout << "Selamat datang di sistem manajemen stok buku\n";
         cout << "=============================================\n";
@@ -183,66 +114,100 @@ int main() {
 
         cin >> login;
 
-        switch (login) {
-            case 1:
-                cout << "Anda masuk sebagai Admin.\n";
-                cout << "=============================================\n\n";
-                do {
-                    cout << "=============================================\n";
-                    cout << "Silakan pilih menu yang tersedia:\n";
-                    cout << "=============================================\n";
-                    cout << "1. Tambah buku\n"; // admin
-                    cout << "2. Pembaruan stok buku setelah transaksi\n"; // admin, nambah stok
-                    cout << "3. Cari buku\n";
-                    cout << "4. Menampilkan seluruh stok buku\n"; // customer dan admin
-                    cout << "5. Kembali\n"; // keluar dari menu admin
-                    cout << "Pilihan: ";
-
-                    cin >> pilihan;
-
-                    switch (pilihan) {
-                        case 1:
-                            // Tambah buku
-                            tambahBuku(stokbuku, chainKategori, chainJudul, chainPenulis);
-                            break;
-                        case 2:
-                            // Pembaruan stok buku setelah transaksi
-                            cout << "Masukkan judul buku yang akan diupdate: ";
-                            break;
-                        case 3:
-                            // Cari buku
-                            cout << "Cari buku berdasarkan: \n";
-                            cout << "1. Kategori\n";
-                            cout << "2. Judul\n";
-                            cout << "3. Penulis\n";
-                            cout << "4. Range Harga\n";
-                            cout << "5. Kembali\n";
-                            break;
-                        case 4:
-                            // Menampilkan seluruh stok buku
-                            cout << "Menampilkan seluruh stok buku";
-                            break;
-                        case 5:
-                            // Kembali ke menu utama
-                            break;
-                        default:
-                            cout << "Menu tidak tersedia!\n";
-                    }
-                } while (pilihan != 5);
-                break;
-
-            case 2:
-                cout << "Anda masuk sebagai Customer.\n\n";
+        if (login == 1)
+        {
+            cout << "Anda masuk sebagai Admin.\n";
+            cout << "=============================================\n\n";
+            do
+            {
                 cout << "=============================================\n";
-                break;
+                cout << "Silakan pilih menu yang tersedia:\n";
+                cout << "=============================================\n";
+                cout << "1. Tambah buku\n";                           // admin
+                cout << "2. Pembaruan stok buku setelah transaksi\n"; // admin, nambah stok
+                cout << "3. Cari buku\n";
+                cout << "4. Menampilkan seluruh stok buku\n"; // customer dan admin
+                cout << "5. Kembali\n";                       // keluar dari menu admin
+                cout << "Pilihan: ";
 
-            case 3:
-                cout << "Terima kasih, sampai jumpa!\n";
-                break;
-            default:
-                cout << "Menu tidak tersedia!\n";
-                break;
-        }    
+                cin >> pilihan;
+
+                if (pilihan == 1)
+                {
+                    // Tambah buku
+                    tambahBuku(stokbuku, kumpulanKategori, kumpulanPenulis, buku);
+                }
+                else if (pilihan == 2)
+                {
+                    // Pembaruan stok buku setelah transaksi
+                    cout << "Masukkan judul buku yang akan diupdate: ";
+                }
+                else if (pilihan == 3)
+                {
+                    // Cari buku
+                    do
+                    {
+                        cout << "Cari buku berdasarkan: \n";
+                        cout << "1. Kategori\n";
+                        cout << "2. Judul\n";
+                        cout << "3. Penulis\n";
+                        cout << "4. Range Harga\n";
+                        cout << "5. Kembali\n";
+                        cout << "Pilihan: ";
+
+                        cin >> pilihanCari;
+                        if (pilihanCari == 1)
+                        {
+                            cout << "Masukkan kategori buku yang ingin dicari: ";
+                            cin >> kategori;
+                            cariBuku(kategori, kumpulanKategori);
+                        }
+                        else if (pilihanCari == 2)
+                        {
+                            cout << "Masukkan judul buku yang ingin dicari: ";
+                            cin >> judul;
+                            // Anda mungkin ingin memanggil fungsi cariBuku di sini
+                        }
+                        else if (pilihanCari == 3)
+                        {
+                            cout << "Masukkan penulis buku yang ingin dicari: ";
+                            cin >> penulis;
+                            cariBuku(penulis, kumpulanPenulis);
+                        }
+                        else
+                        {
+                            cout << "Menu tidak tersedia!\n";
+                        }
+                    } while (pilihanCari != 5);
+                }
+                else if (pilihan == 4)
+                {
+                    // Menampilkan seluruh stok buku
+                    cout << "Menampilkan seluruh stok buku";
+                }
+                else if (pilihan == 5)
+                {
+                    // Kembali ke menu utama
+                }
+                else
+                {
+                    cout << "Menu tidak tersedia!\n";
+                }
+            } while (pilihan != 5);
+        }
+        else if (login == 2)
+        {
+            cout << "Anda masuk sebagai Customer.\n\n";
+            cout << "=============================================\n";
+        }
+        else if (login == 3)
+        {
+            cout << "Terima kasih, sampai jumpa!\n";
+        }
+        else
+        {
+            cout << "Menu tidak tersedia!\n";
+        }
     } while (login != 3);
 
     return 0;
