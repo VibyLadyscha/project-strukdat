@@ -1,9 +1,14 @@
 #include <iostream>
 #include <vector>
 #include <fstream>
+#include <string>
+#include <math.h>
 using namespace std;
 
-// Struktur data untuk menyimpan data barang
+#define size 1000
+#define h(k) k % size
+
+// Struct untuk menyimpan data barang
 struct Buku {
     string kategori;
     string genre;
@@ -13,6 +18,15 @@ struct Buku {
     int harga;
     int stok;
 };
+
+// Struct untuk menyimpan data key dan isinya dalam hash table
+struct NodeHash {
+    string key;
+    Buku* buku;
+    NodeHash* next;
+};
+
+struct NodeHash* chain[size][size];
 
 // Fungsi untuk menambahkan barang baru ke dalam sistem stok barang
 void tambahBuku(vector<Buku> &stokbuku) {
@@ -34,9 +48,106 @@ void tambahBuku(vector<Buku> &stokbuku) {
     cout << "\tMasukkan stok buku: ";
     cin >> buku.stok;
 
-    stokbuku.push_back(buku);
+    stokbuku.push_back(buku); // Menambahkan buku ke dalam stok buku
+    insertHash(buku.kategori, &stokbuku.back()); // Menambahkan buku ke dalam hash table dengan key kategori
+    insertHash(buku.judul, &stokbuku.back()); // Menambahkan buku ke dalam hash table dengan key judul
+    insertHash(buku.penulis, &stokbuku.back()); // Menambahkan buku ke dalam hash table dengan key penulis
+
     cout << "Buku " << buku.judul << " sebanyak " << buku.stok << " buah berhasil ditambahkan ke dalam stok buku!\n";
     cout << "=============================================\n";
+}
+
+// Membuat kerangka hash table
+void init() { // Inisialisasi hash table
+    int i, j;
+    for (i = 0; i < size; i++) {
+        for (j = 0; j < size; j++) {
+            chain[i][j] = NULL;
+        }
+    }
+}
+
+int keyToValue(string key) { // Mengubah key menjadi value
+    int n = key.length();
+    int i;
+    int radix128 = 0;
+    for (i = 0; i < n; i++) {
+        radix128 += key[n - 1 - i] * pow(128, i);
+    }
+    return radix128;
+}
+
+void insertHash(string key, Buku* buku) { // Memasukkan data ke dalam hash table
+    int idx = h(keyToValue(key));
+
+    NodeHash* temp = chain[idx][0];
+    while (temp != NULL) {
+        
+        if (temp->key == key) {
+            // Jika kunci sudah ada, maka tambahkan ke dalam linked list
+            while (temp->next != NULL) {
+                temp = temp->next;
+            }
+            NodeHash* newNode = new NodeHash;
+            newNode->key = key;
+            newNode->buku = buku;
+            newNode->next = NULL;
+            temp->next = newNode;
+            return;
+        }
+        temp = temp->next;
+    }
+
+    for (int i = 0; i < size; i++) {
+        if (chain[idx][i] == NULL) {
+            NodeHash* newNode = new NodeHash;
+            newNode->key = key;
+            newNode->buku = buku;
+            newNode->next = NULL;
+            chain[idx][i] = newNode;
+            return;
+        }
+    }
+
+}
+
+void updateHash(string key, int stok) { // Mengupdate stok buku dalam hash table
+    int idx = h(keyToValue(key));
+
+    NodeHash* temp = chain[idx][0];
+    while (temp && temp->key != key) {
+        temp = temp->next;
+    }
+
+    if (temp == NULL) {
+        return;
+    }
+
+    temp->buku->stok = stok;
+}
+
+void deleteHash(string key) { // Menghapus data dari hash table
+    int idx = h(keyToValue(key));
+
+    NodeHash* temp = chain[idx][0];
+    NodeHash* prev = temp;
+
+    while (temp != NULL && temp->key != key) { // Mencari key yang akan dihapus
+        prev = temp;
+        temp = temp->next;
+    }
+
+    if (temp == NULL) { // Jika key tidak ditemukan
+        return;
+    }
+
+    if (temp == chain[idx][0]) { // Jika node yang akan dihapus berada di head
+        chain[idx][0] = temp->next;
+    } else {
+        prev->next = temp->next;
+    }
+
+    delete temp;
 }
 
 // Fungsi untuk mencari buku berdasarkan kategori
@@ -77,7 +188,7 @@ int main() {
 
         switch (login) {
             case 1:
-                cout << "Anda masuk sebagai Admin!\n";
+                cout << "Anda masuk sebagai Admin.\n";
                 cout << "=============================================\n\n";
                 do {
                     cout << "=============================================\n";
@@ -118,17 +229,21 @@ int main() {
                             // Kembali ke menu utama
                             break;
                         default:
-                            cout << "Menu tidak tersedia\n";
+                            cout << "Menu tidak tersedia!\n";
                     }
                 } while (pilihan != 5);
                 break;
 
             case 2:
-                cout << "Anda masuk sebagai Customer!\n\n";
+                cout << "Anda masuk sebagai Customer.\n\n";
                 cout << "=============================================\n";
                 break;
+
+            case 3:
+                cout << "Terima kasih, sampai jumpa!\n";
+                break;
             default:
-                
+                cout << "Menu tidak tersedia!\n";
                 break;
         }    
     } while (login != 3);
