@@ -31,6 +31,8 @@ void tambahBuku(vector<Buku> &stokbuku, unordered_map<string, vector<Buku>> &kum
 {
     if (!fromFile)
     {
+        cout << "=============================================\n";
+        cout << "Masukkan data buku yang ingin ditambahkan:\n";
         cout << "\tMasukkan kategori buku: ";
         cin >> buku.kategori;
         cout << "\tMasukkan genre buku: ";
@@ -47,6 +49,9 @@ void tambahBuku(vector<Buku> &stokbuku, unordered_map<string, vector<Buku>> &kum
         cin >> buku.harga;
         cout << "\tMasukkan stok buku: ";
         cin >> buku.stok;
+
+        cout << "Buku berhasil ditambahkan!\n";
+        cout << "=============================================\n\n";
     }
 
     stokbuku.push_back(buku);                                              // Menambahkan buku ke dalam vektor stokbuku
@@ -151,8 +156,9 @@ int main()
 
         cin >> login;
 
-        if (login == 1)
+        switch (login)
         {
+        case 1:
             cout << "Anda masuk sebagai Admin.\n";
             cout << "=============================================\n\n";
             do
@@ -168,22 +174,23 @@ int main()
                 cout << "Pilihan: ";
 
                 cin >> pilihan;
+                cout << "\n";
 
-                if (pilihan == 1)
+                switch (pilihan)
                 {
+                case 1:
                     // Tambah buku
                     tambahBuku(stokbuku, kumpulanKategori, kumpulanPenulis, kumpulanJudul, buku);
-                }
-                else if (pilihan == 2)
-                {
+                    break;
+                case 2:
                     // Pembaruan stok buku setelah transaksi
-                    cout << "Masukkan judul buku yang akan diupdate: ";
-                }
-                else if (pilihan == 3)
-                {
+                    cout << "\nMasukkan judul buku yang akan diupdate: ";
+                    break;
+                case 3:
                     // Cari buku
                     do
                     {
+                        cout << "=============================================\n";
                         cout << "Cari buku berdasarkan: \n";
                         cout << "1. Kategori\n";
                         cout << "2. Judul\n";
@@ -193,26 +200,24 @@ int main()
                         cout << "Pilihan: ";
 
                         cin >> pilihanCari;
-                        if (pilihanCari == 1)
+                        switch (pilihanCari)
                         {
+                        case 1:
                             cout << "Masukkan kategori buku yang ingin dicari: ";
                             cin >> kategori;
                             cariBuku(kategori, kumpulanKategori);
-                        }
-                        else if (pilihanCari == 2)
-                        {
+                            break;
+                        case 2:
                             cout << "Masukkan judul buku yang ingin dicari: ";
                             cin >> judul;
                             cariBuku(judul, kumpulanJudul);
-                        }
-                        else if (pilihanCari == 3)
-                        {
+                            break;
+                        case 3:
                             cout << "Masukkan penulis buku yang ingin dicari: ";
                             cin >> penulis;
                             cariBuku(penulis, kumpulanPenulis);
-                        }
-                        else if (pilihanCari == 4)
-                        {
+                            break;
+                        case 4:
                             cout << "\n=============================================\n";
                             cout << "Masukkan range harga buku yang ingin dicari: \n";
                             cout << "\tHarga minimum: Rp ";
@@ -220,40 +225,36 @@ int main()
                             cout << "\tHarga maksimum: Rp ";
                             cin >> hargaMax;
                             cariBukuHarga(stokbuku, hargaMin, hargaMax);
-                        }
-                        else
-                        {
+                            break;
+                        default:
                             cout << "Menu tidak tersedia!\n";
+                            break;
                         }
                     } while (pilihanCari != 5);
-                }
-                else if (pilihan == 4)
-                {
+                    break;
+                case 4:
                     // Menampilkan seluruh stok buku
                     cout << "Menampilkan seluruh stok buku";
-                }
-                else if (pilihan == 5)
-                {
+                    break;
+                case 5:
                     // Kembali ke menu utama
-                }
-                else
-                {
+                    break;
+                default:
                     cout << "Menu tidak tersedia!\n";
+                    break;
                 }
             } while (pilihan != 5);
-        }
-        else if (login == 2)
-        {
+            break;
+        case 2:
             cout << "Anda masuk sebagai Customer.\n\n";
             cout << "=============================================\n";
-        }
-        else if (login == 3)
-        {
-            cout << "Terima kasih, sampai jumpa!\n";
-        }
-        else
-        {
+            break;
+        case 3:
+            cout << "Terima kasih, sampai jumpa kembali!\n";
+            break;
+        default:
             cout << "Menu tidak tersedia!\n";
+            break;
         }
     } while (login != 3);
 
