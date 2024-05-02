@@ -19,14 +19,15 @@ struct Buku
 };
 
 // Fungsi untuk menambahkan barang ke dalam unordered_map
-void tambahBukuMap(unordered_map<string, vector<Buku>>& kumpulanKategori, unordered_map<string, vector<Buku>>& kumpulanPenulis, const Buku& buku)
+void tambahBukuMap(unordered_map<string, vector<Buku>>& kumpulanKategori, unordered_map<string, vector<Buku>>& kumpulanPenulis, unordered_map<string, vector<Buku>>& kumpulanJudul, const Buku& buku)
 {
     kumpulanKategori[buku.kategori].push_back(buku);
     kumpulanPenulis[buku.penulis].push_back(buku);
+    kumpulanJudul[buku.judul].push_back(buku);
 }
 
 // Fungsi untuk menambahkan barang baru ke dalam sistem stok barang
-void tambahBuku(vector<Buku>& stokbuku, unordered_map<string, vector<Buku>>& kumpulanKategori, unordered_map<string, vector<Buku>>& kumpulanPenulis, Buku buku, bool fromFile = false)
+void tambahBuku(vector<Buku>& stokbuku, unordered_map<string, vector<Buku>>& kumpulanKategori, unordered_map<string, vector<Buku>>& kumpulanPenulis, unordered_map<string, vector<Buku>>& kumpulanJudul, Buku buku, bool fromFile = false)
 {
     if (!fromFile)
     {
@@ -49,7 +50,7 @@ void tambahBuku(vector<Buku>& stokbuku, unordered_map<string, vector<Buku>>& kum
     }
 
     stokbuku.push_back(buku); // Menambahkan buku ke dalam vektor stokbuku
-    tambahBukuMap(kumpulanKategori, kumpulanPenulis, buku); // Menambahkan buku ke dalam unordered_map
+    tambahBukuMap(kumpulanKategori, kumpulanPenulis, kumpulanJudul, buku); // Menambahkan buku ke dalam unordered_map
 }
 
 // Fungsi untuk mencari buku berdasarkan kategori atau penulis
@@ -79,6 +80,7 @@ int main()
 {
     vector<Buku> stokbuku;
     unordered_map<string, vector<Buku>> kumpulanKategori;
+    unordered_map<string, vector<Buku>> kumpulanJudul;
     unordered_map<string, vector<Buku>> kumpulanPenulis;
 
     // Menambahkan buku dari input file
@@ -93,7 +95,7 @@ int main()
            inputFile >> buku.harga >> buku.stok)
     {
         inputFile.ignore(); // Mengabaikan karakter newline
-        tambahBuku(stokbuku, kumpulanKategori, kumpulanPenulis, buku, true); // Menambahkan buku ke dalam vektor stokbuku dan unordered_map
+        tambahBuku(stokbuku, kumpulanKategori, kumpulanPenulis, kumpulanJudul, buku, true);
     }
 
     inputFile.close();
@@ -135,7 +137,7 @@ int main()
                 if (pilihan == 1)
                 {
                     // Tambah buku
-                    tambahBuku(stokbuku, kumpulanKategori, kumpulanPenulis, buku);
+                    tambahBuku(stokbuku, kumpulanKategori, kumpulanPenulis, kumpulanJudul, buku);
                 }
                 else if (pilihan == 2)
                 {
@@ -166,7 +168,7 @@ int main()
                         {
                             cout << "Masukkan judul buku yang ingin dicari: ";
                             cin >> judul;
-                            // Anda mungkin ingin memanggil fungsi cariBuku di sini
+                            cariBuku(judul, kumpulanJudul);
                         }
                         else if (pilihanCari == 3)
                         {
