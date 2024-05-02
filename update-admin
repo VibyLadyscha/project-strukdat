@@ -1,0 +1,321 @@
+#include <iostream>
+#include <vector>
+#include <fstream>
+#include <string>
+#include <math.h>
+
+using namespace std;
+
+#define size 1000
+#define h(k) k % size
+
+// Struct for storing book data
+struct Buku {
+    string kategori;
+    string genre;
+    string judul;
+    string penulis;
+    string penerbit;
+    int harga;
+    int stok;
+};
+
+// Struct for storing key-value pairs in the hash table
+struct NodeHash {
+    string key;
+    Buku* buku;
+    NodeHash* next;
+};
+
+// Creating three separate hash tables for category, title, and author
+struct NodeHash* chainKategori[size];
+struct NodeHash* chainJudul[size];
+struct NodeHash* chainPenulis[size];
+
+// Initialize all hash tables
+void init() {
+    for (int i = 0; i < size; i++) {
+        chainKategori[i] = NULL;
+        chainJudul[i] = NULL;
+        chainPenulis[i] = NULL;
+    }
+}
+
+// Function to convert key to value
+int keyToValue(string key) {
+    int n = key.length();
+    int radix8 = 0;
+    for (int i = 0; i < n; i++) {
+        radix8 += key[n - 1 - i] * pow(8, i);
+    }
+    return radix8;
+}
+
+// Insert data into hash table
+void insertHash(string key, Buku* buku, NodeHash* chain[]) {
+    int idx = h(keyToValue(key));
+
+    if (chain[idx] == NULL) {
+        // If no data at this hash index, insert directly
+        NodeHash* newNode = new NodeHash;
+        newNode->key = key;
+        newNode->buku = buku;
+        newNode->next = NULL;
+        chain[idx] = newNode;
+    } else {
+        // If there's data at this hash index, add to the linked list
+        NodeHash* temp = chain[idx];
+        while (temp->next) {
+            temp = temp->next;
+        }
+
+        NodeHash* newNode = new NodeHash;
+        newNode->key = key;
+        newNode->buku = buku;
+        newNode->next = NULL;
+        temp->next = newNode;
+    }
+}
+
+// Function to search for data in hash table
+NodeHash* searchHash(string key, NodeHash* chain[]) {
+    int idx = h(keyToValue(key));
+    NodeHash* temp = chain[idx];
+    while (temp != NULL) {
+        if (temp->key == key) {
+            return temp;
+        }
+        temp = temp->next;
+    }
+    return NULL;
+}
+
+// Function to update book stock in hash table
+void updateHash(string key, int stok,  NodeHash* chain[]) {
+    NodeHash* temp = searchHash(key, chain);
+    if (temp != NULL) {
+        temp->buku->stok = stok;
+    }
+}
+
+// Function to delete data from hash table
+void deleteHash(string key,  NodeHash* chain[]) {
+    int idx = h(keyToValue(key));
+
+    NodeHash* temp = chain[idx];
+    NodeHash* prev = temp;
+
+    while (temp != NULL && temp->key != key) {
+        prev = temp;
+        temp = temp->next;
+    }
+
+    if (temp == NULL) {
+        return;
+    }
+
+    if (prev == NULL) {
+        chain[idx] = temp->next;
+    } else {
+        prev->next = temp->next;
+    }
+
+    delete temp;
+}
+
+// Function to add a new book to the system
+void tambahBuku(vector<Buku>& stokbuku, Node*& headKategori, Node*& headJudul, Node*& headPenulis) {
+    Buku buku;
+    cout << "\tMasukkan kategori buku: ";
+    cin >> buku.kategori;
+    cout << "\tMasukkan genre buku: ";
+    cin >> buku.genre;
+    cin.ignore();  
+    cout << "\tMasukkan judul buku: ";
+    getline(cin, buku.judul);
+    cout << "\tMasukkan penulis buku: ";
+    cin >> buku.penulis;
+    cin.ignore();  
+    cout << "\tMasukkan penerbit buku: ";
+    getline(cin, buku.penerbit);
+    cout << "\tMasukkan harga buku: Rp";
+    cin >> buku.harga;
+    cout << "\tMasukkan stok buku: ";
+    cin >> buku.stok;
+
+    stokbuku.push_back(buku);
+
+    // Update linked list for category
+    Node* newNodeKategori = new Node;
+    newNodeKategori->buku = &stokbuku.back();
+    newNodeKategori->next = headKategori;
+    headKategori = newNodeKategori;
+
+    // Update linked list for title
+    Node* newNodeJudul = new Node;
+    newNodeJudul->buku = &stokbuku.back();
+    newNodeJudul->next = headJudul;
+    headJudul = newNodeJudul;
+
+    // Update linked list for author
+    Node* newNodePenulis = new Node;
+    newNodePenulis->buku = &stokbuku.back();
+    newNodePenulis->next = headPenulis;
+    headPenulis = newNodePenulis;
+
+    cout << "Buku " << buku.judul << " sebanyak " << buku.stok << " buah berhasil ditambahkan ke dalam stok buku!\n";
+    cout << "=============================================\n";
+}
+
+// Function to update book stock after transaction
+void updateStokBuku(vector<Buku>& stokbuku) {
+    string judul;
+    cout << "Masukkan judul buku: ";
+    cin.ignore(); 
+    getline(cin, judul);
+
+    bool found = false;
+    for (auto& buku : stokbuku) {
+        if (buku.judul == judul) {
+            int tambahStok;
+            cout << "Masukkan jumlah stok yang ditambahkan: ";
+            cin >> tambahStok;
+            buku.stok += tambahStok;
+            cout << "Stok buku " << judul << " berhasil diperbarui. Stok saat ini: " << buku.stok << endl;
+            found = true;
+            break;
+        }
+    }
+    if (!found) {
+        cout << "Buku dengan judul " << judul << " tidak ditemukan." << endl;
+    }
+}
+
+// Function to search for a book by title
+void cariBuku(const vector<Buku>& stokbuku) {
+    string judul;
+    cout << "Masukkan judul buku yang ingin dicari: ";
+    cin.ignore(); 
+    getline(cin, judul);
+
+    bool found = false;
+    for (const auto& buku : stokbuku) {
+        if (buku.judul == judul) {
+            cout << "Detail buku:\n";
+            cout << "Kategori: " << buku.kategori << endl;
+            cout << "Judul: " << buku.judul << endl;
+            cout << "Penulis: " << buku.penulis << endl;
+            cout << "Penerbit: " << buku.penerbit << endl;
+            cout << "Stok: " << buku.stok << endl;
+            found = true;
+            break;
+        }
+    }
+    if (!found) {
+        cout << "Buku dengan judul " << judul << " tidak ditemukan." << endl;
+    }
+}
+
+
+// Struct for storing book data in a linked list
+struct Node {
+    Buku* buku;
+    Node* next;
+};
+
+// Function to display book stock by category using a linked list
+void showBooksByCategory(Node* head, const string& category) {
+    cout << "Books in category '" << category << "':\n";
+    Node* temp = head;
+    while (temp) {
+        if (temp->buku->kategori == category) {
+            cout << "Title: " << temp->buku->judul << ", Stock: " << temp->buku->stok << endl;
+        }
+        temp = temp->next;
+    }
+}
+
+int main() {
+    vector<Buku> stokbuku;
+    // Initialize hash tables
+    init();
+
+    int pilihan, login;
+
+    do {
+        cout << "=============================================\n";
+        cout << "Selamat datang di sistem manajemen stok buku\n";
+        cout << "=============================================\n";
+        cout << "Masuk sebagai\n";
+        cout << "1. Admin\n";
+        cout << "2. Customer\n";
+        cout << "3. Keluar\n";
+        cout << "Pilihan: ";
+
+        cin >> login;
+
+        switch (login) {
+            case 1:
+                cout << "Anda masuk sebagai Admin!\n";
+                cout << "=============================================\n\n";
+                do {
+                    cout << "=============================================\n";
+                    cout << "Silakan pilih menu yang tersedia:\n";
+                    cout << "=============================================\n";
+                    cout << "1. Tambah buku\n";
+                    cout << "2. Pembaruan stok buku setelah transaksi\n";
+                    cout << "3. Cari buku\n";
+                    cout << "4. Menampilkan seluruh stok buku\n";
+                    cout << "5. Menampilkan stok buku berdasarkan kategori\n";
+                    cout << "6. Kembali\n";
+                    cout << "Pilihan: ";
+
+                    cin >> pilihan;
+
+                    switch (pilihan) {
+                        case 1:
+                            // Add book
+                            tambahBuku(stokbuku, chainKategori, chainJudul, chainPenulis);
+                            break;
+                        case 2:
+                            // Update stock after transaction
+                            updateStokBuku(stokbuku);
+                            break;
+                        case 3:
+                            // Search for a book
+                            cariBuku(stokbuku);
+                            break;
+                        case 4:
+                            // Show all book stocks
+                            // You need to implement this function
+                            break;
+                        case 5:
+                            // Show book stock by category
+                            cout << "Masukkan kategori buku: ";
+                            string kategori;
+                            cin >> kategori;
+                            showBooksByCategory(chainKategori[keyToValue(kategori)], kategori);
+                            break;
+                        case 6:
+                            // Back to main menu
+                            break;
+                        default:
+                            cout << "Menu tidak tersedia!\n";
+                    }
+                } while (pilihan != 6);
+                break;
+            case 2:
+                cout << "Anda masuk sebagai Customer.\n\n";
+                cout << "=============================================\n";
+                break;
+            case 3:
+                cout << "Terima kasih, sampai jumpa!\n";
+                break;
+            default:
+                cout << "Menu tidak tersedia!\n";
+                break;
+        }    
+    } while (login != 3);
+
+    return 0;
+}
