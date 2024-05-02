@@ -41,6 +41,7 @@ void init() {
     }
 }
 
+
 int keyToValue(string key) { // Mengubah key menjadi value
     int n = key.length();
     int i;
@@ -62,21 +63,43 @@ void insertHash(string key, Buku* buku, NodeHash* chain[]) { // Memasukkan data 
         newNode->next = NULL;
         chain[idx] = newNode;
     } else {
-        // Jika ada data di indeks hash tersebut, tambahkan ke dalam linked list
+        // Jika ada data di indeks hash tersebut
         NodeHash* temp = chain[idx];
-        while (temp->next) {
+        // Cek apakah key yang sama sudah ada di indeks tersebut
+        while (temp != NULL) {
+            if (temp->key == key) {
+                // Jika key yang sama sudah ada, gunakan chaining untuk menyimpan data tambahan
+                while (temp->next != NULL) {
+                    temp = temp->next;
+                }
+                NodeHash* newNode = new NodeHash;
+                newNode->key = key;
+                newNode->buku = buku;
+                newNode->next = NULL;
+                temp->next = newNode;
+                return;
+            }
             temp = temp->next;
         }
-
-        NodeHash* newNode = new NodeHash;
-        newNode->key = key;
-        newNode->buku = buku;
-        newNode->next = NULL;
-        temp->next = newNode;
+        // Jika tidak ada key yang sama, gunakan open addressing untuk mencari lokasi yang tepat
+        int nextIdx = (idx + 1) % size;
+        while (nextIdx != idx) {
+            if (chain[nextIdx] == NULL) {
+                NodeHash* newNode = new NodeHash;
+                newNode->key = key;
+                newNode->buku = buku;
+                newNode->next = NULL;
+                chain[nextIdx] = newNode;
+                return;
+            }
+            nextIdx = (nextIdx + 1) % size;
+        }
+        // Jika tidak ada ruang kosong, pesan kesalahan
+        //cout << "Hash table penuh.\n";
     }
 }
 
-NodeHash* searchHash(string key, NodeHash* chain[]) { // Mencari data berdasarkan dalam hash table
+NodeHash* searchHash(string key, NodeHash* chain[]) { // Mencari data berdasarkan key dalam hash table
     int idx = h(keyToValue(key));
     NodeHash* temp = chain[idx];
     while (temp != NULL) {
@@ -88,10 +111,10 @@ NodeHash* searchHash(string key, NodeHash* chain[]) { // Mencari data berdasarka
     return NULL;
 }
 
-void updateHash(string key, int stok,  NodeHash* chain[]) { // Mengupdate stok buku dalam hash table
-    NodeHash* temp = searchHash(key, chain);
-    if (temp != NULL) {
-        temp->buku->stok = stok;
+void updateHash(string key, int stok, NodeHash* chain[]) { // Mengupdate stok buku dalam hash table
+    NodeHash* node = searchHash(key, chain);
+    if (node != NULL) {
+        node->buku->stok = stok;
     }
 }
 
@@ -99,7 +122,7 @@ void deleteHash(string key,  NodeHash* chain[]) { // Menghapus data dari hash ta
     int idx = h(keyToValue(key));
 
     NodeHash* temp = chain[idx];
-    NodeHash* prev = temp;
+    NodeHash* prev = NULL;
 
     while (temp != NULL && temp->key != key) { // Mencari key yang akan dihapus
         prev = temp;
@@ -120,7 +143,7 @@ void deleteHash(string key,  NodeHash* chain[]) { // Menghapus data dari hash ta
 }
 
 // Fungsi untuk menambahkan barang baru ke dalam sistem stok barang
-void tambahBuku(vector<Buku> &stokbuku,  NodeHash* chainKategori[], NodeHash* chainJudul[], NodeHash* chainPenulis[]) {
+void tambahBuku(vector<Buku> &stokbuku, NodeHash* chainKategori[], NodeHash* chainJudul[], NodeHash* chainPenulis[]) {
     Buku buku;
     cout << "\tMasukkan kategori buku: ";
     cin >> buku.kategori;
@@ -147,6 +170,9 @@ void tambahBuku(vector<Buku> &stokbuku,  NodeHash* chainKategori[], NodeHash* ch
     cout << "Buku " << buku.judul << " sebanyak " << buku.stok << " buah berhasil ditambahkan ke dalam stok buku!\n";
     cout << "=============================================\n";
 }
+
+// Fungsi untuk mencari buku berdasarkan kategori
+
 
 int main() {
     vector<Buku> stokbuku;
