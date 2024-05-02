@@ -28,35 +28,6 @@ struct NodeHash {
 
 struct NodeHash* chain[size][size];
 
-// Fungsi untuk menambahkan barang baru ke dalam sistem stok barang
-void tambahBuku(vector<Buku> &stokbuku) {
-    Buku buku;
-    cout << "\tMasukkan kategori buku: ";
-    cin >> buku.kategori;
-    cout << "\tMasukkan genre buku: ";
-    cin >> buku.genre;
-    cin.ignore();  // Mengabaikan karakter newline yang tersisa di buffer    
-    cout << "\tMasukkan judul buku: ";
-    getline(cin, buku.judul);
-    cout << "\tMasukkan penulis buku: ";
-    cin >> buku.penulis;
-    cin.ignore();  // Mengabaikan karakter newline yang tersisa di buffer 
-    cout << "\tMasukkan penerbit buku: ";
-    getline(cin, buku.penerbit);
-    cout << "\tMasukkan harga buku: Rp";
-    cin >> buku.harga;
-    cout << "\tMasukkan stok buku: ";
-    cin >> buku.stok;
-
-    stokbuku.push_back(buku); // Menambahkan buku ke dalam stok buku
-    insertHash(buku.kategori, &stokbuku.back()); // Menambahkan buku ke dalam hash table dengan key kategori
-    insertHash(buku.judul, &stokbuku.back()); // Menambahkan buku ke dalam hash table dengan key judul
-    insertHash(buku.penulis, &stokbuku.back()); // Menambahkan buku ke dalam hash table dengan key penulis
-
-    cout << "Buku " << buku.judul << " sebanyak " << buku.stok << " buah berhasil ditambahkan ke dalam stok buku!\n";
-    cout << "=============================================\n";
-}
-
 // Membuat kerangka hash table
 void init() { // Inisialisasi hash table
     int i, j;
@@ -150,13 +121,42 @@ void deleteHash(string key) { // Menghapus data dari hash table
     delete temp;
 }
 
+// Fungsi untuk menambahkan barang baru ke dalam sistem stok barang
+void tambahBuku(vector<Buku> &stokbuku) {
+    Buku buku;
+    cout << "\tMasukkan kategori buku: ";
+    cin >> buku.kategori;
+    cout << "\tMasukkan genre buku: ";
+    cin >> buku.genre;
+    cin.ignore();  // Mengabaikan karakter newline yang tersisa di buffer    
+    cout << "\tMasukkan judul buku: ";
+    getline(cin, buku.judul);
+    cout << "\tMasukkan penulis buku: ";
+    cin >> buku.penulis;
+    cin.ignore();  // Mengabaikan karakter newline yang tersisa di buffer 
+    cout << "\tMasukkan penerbit buku: ";
+    getline(cin, buku.penerbit);
+    cout << "\tMasukkan harga buku: Rp";
+    cin >> buku.harga;
+    cout << "\tMasukkan stok buku: ";
+    cin >> buku.stok;
+
+    stokbuku.push_back(buku); // Menambahkan buku ke dalam stok buku
+    // insertHash(buku.kategori, &stokbuku.back()); // Menambahkan buku ke dalam hash table dengan key kategori
+    // insertHash(buku.judul, &stokbuku.back()); // Menambahkan buku ke dalam hash table dengan key judul
+    // insertHash(buku.penulis, &stokbuku.back()); // Menambahkan buku ke dalam hash table dengan key penulis
+
+    cout << "Buku " << buku.judul << " sebanyak " << buku.stok << " buah berhasil ditambahkan ke dalam stok buku!\n";
+    cout << "=============================================\n";
+}
+
 // Fungsi untuk mencari buku berdasarkan kategori
 
 
 int main() {
     vector<Buku> stokbuku;
     // Menambahkan buku dari input file
-    ifstream inputFile("default stock.txt");
+    ifstream inputFile("defaultstock.txt");
     Buku buku;
 
     while (getline(inputFile, buku.kategori, '\t') &&
@@ -167,9 +167,9 @@ int main() {
            inputFile >> buku.harga >> buku.stok) {
         inputFile.ignore(); // Mengabaikan karakter newline yang tersisa di buffer
         stokbuku.push_back(buku);
-        insertHash(buku.kategori, &stokbuku.back()); // Menambahkan buku ke dalam hash table dengan key kategori
-        insertHash(buku.judul, &stokbuku.back()); // Menambahkan buku ke dalam hash table dengan key judul
-        insertHash(buku.penulis, &stokbuku.back()); // Menambahkan buku ke dalam hash table dengan key penulis
+        // insertHash(buku.kategori, &stokbuku.back()); // Menambahkan buku ke dalam hash table dengan key kategori
+        // insertHash(buku.judul, &stokbuku.back()); // Menambahkan buku ke dalam hash table dengan key judul
+        // insertHash(buku.penulis, &stokbuku.back()); // Menambahkan buku ke dalam hash table dengan key penulis
     }
 
     inputFile.close();
