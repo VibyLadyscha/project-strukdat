@@ -167,12 +167,14 @@ int main() {
            inputFile >> buku.harga >> buku.stok) {
         inputFile.ignore(); // Mengabaikan karakter newline yang tersisa di buffer
         stokbuku.push_back(buku);
+        insertHash(buku.kategori, &stokbuku.back()); // Menambahkan buku ke dalam hash table dengan key kategori
+        insertHash(buku.judul, &stokbuku.back()); // Menambahkan buku ke dalam hash table dengan key judul
+        insertHash(buku.penulis, &stokbuku.back()); // Menambahkan buku ke dalam hash table dengan key penulis
     }
 
     inputFile.close();
 
-    int pilihan;
-    int login;
+    int pilihan, login;
 
     do {
         cout << "=============================================\n";
