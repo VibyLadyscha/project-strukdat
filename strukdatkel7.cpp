@@ -2,7 +2,6 @@
 #include <vector>
 #include <fstream>
 #include <string>
-#include <math.h>
 #include <unordered_map>
 using namespace std;
 
@@ -16,6 +15,13 @@ struct Buku
     string penerbit;
     int harga;
     int stok;
+};
+
+// Struct untuk menyimpan data keranjang belanja
+struct Keranjang
+{
+    Buku buku;
+    int jumlah;
 };
 
 // Fungsi untuk menambahkan barang ke dalam unordered_map
@@ -41,8 +47,7 @@ void tambahBuku(vector<Buku> &stokbuku, unordered_map<string, vector<Buku>> &kum
         cout << "\tMasukkan judul buku: ";
         getline(cin, buku.judul);
         cout << "\tMasukkan penulis buku: ";
-        cin >> buku.penulis;
-        cin.ignore(); // Mengabaikan karakter newline yang tersisa di buffer
+        getline(cin, buku.penulis);
         cout << "\tMasukkan penerbit buku: ";
         getline(cin, buku.penerbit);
         cout << "\tMasukkan harga buku: Rp";
@@ -56,6 +61,89 @@ void tambahBuku(vector<Buku> &stokbuku, unordered_map<string, vector<Buku>> &kum
 
     stokbuku.push_back(buku);                                              // Menambahkan buku ke dalam vektor stokbuku
     tambahBukuMap(kumpulanKategori, kumpulanPenulis, kumpulanJudul, buku); // Menambahkan buku ke dalam unordered_map
+}
+
+// Fungsi untuk update stok unordered map setelah transaksi
+void updateMap(unordered_map<string, vector<Buku>> &kumpulanKategori, unordered_map<string, vector<Buku>> &kumpulanPenulis, unordered_map<string, vector<Buku>> &kumpulanJudul, const Buku &buku)
+{
+    for (auto &b : kumpulanKategori[buku.kategori])
+    {
+        if (b.judul == buku.judul)
+        {
+            b.stok = buku.stok;
+        }
+    }
+
+    for (auto &b : kumpulanPenulis[buku.penulis])
+    {
+        if (b.judul == buku.judul)
+        {
+            b.stok = buku.stok;
+        }
+    }
+
+    for (auto &b : kumpulanJudul[buku.judul])
+    {
+        if (b.judul == buku.judul)
+        {
+            b.stok = buku.stok;
+        }
+    }
+}
+
+// Fungsi untuk menambahkan barang ke keranjang
+void tambahKeKeranjang(vector<Buku> &stokbuku, vector<Keranjang> &keranjang, unordered_map<string, vector<Buku>> &kumpulanKategori, unordered_map<string, vector<Buku>> &kumpulanPenulis, unordered_map<string, vector<Buku>> &kumpulanJudul)
+{
+    string judul;
+    int jumlah;
+    cout << "\tMasukkan judul buku yang ingin ditambahkan ke keranjang: ";
+    cin.ignore();
+    getline(cin, judul);
+    cout << "\tMasukkan jumlah buku yang ingin ditambahkan: ";
+    cin >> jumlah;
+
+    for (int i = 0; i < stokbuku.size(); i++)
+    {
+        if (stokbuku[i].judul == judul)
+        {
+            if (stokbuku[i].stok >= jumlah)
+            {
+                Keranjang k;
+                k.buku = stokbuku[i];
+                k.jumlah = jumlah;
+                keranjang.push_back(k);
+                stokbuku[i].stok -= jumlah;
+                updateMap(kumpulanKategori, kumpulanPenulis, kumpulanJudul, stokbuku[i]);
+                cout << "Buku " << judul << " sebanyak " << jumlah << " buah berhasil ditambahkan ke keranjang!\n";
+            }
+            else
+            {
+                cout << "Stok buku tidak cukup!\n";
+            }
+            return;
+        }
+    }
+
+    cout << "Buku dengan judul " << judul << " tidak ditemukan!\n";
+}
+
+// Fungsi untuk menampilkan isi keranjang
+void tampilkanKeranjang(vector<Keranjang> &keranjang)
+{
+    cout << "Isi Keranjang:\n";
+    for (int i = 0; i < keranjang.size(); i++)
+    {
+        cout << i + 1 << ". " << keranjang[i].buku.judul << " (" << keranjang[i].jumlah << ")\n";
+    }
+}
+
+// Fungsi untuk melakukan checkout
+void checkout(vector<Keranjang> &keranjang)
+{
+    cout << "Anda telah melakukan checkout dengan item berikut:\n";
+    tampilkanKeranjang(keranjang);
+    keranjang.clear();
+    cout << "Terima kasih telah berbelanja!\n";
 }
 
 // Fungsi untuk mencari buku berdasarkan kategori atau penulis
@@ -119,6 +207,7 @@ void cariBukuHarga(const vector<Buku> &stokbuku, int hargaMin, int hargaMax)
 int main()
 {
     vector<Buku> stokbuku;
+    vector<Keranjang> keranjang;
     unordered_map<string, vector<Buku>> kumpulanKategori;
     unordered_map<string, vector<Buku>> kumpulanJudul;
     unordered_map<string, vector<Buku>> kumpulanPenulis;
@@ -209,12 +298,14 @@ int main()
                             break;
                         case 2:
                             cout << "Masukkan judul buku yang ingin dicari: ";
-                            cin >> judul;
+                            cin.ignore();
+                            getline(cin, judul);
                             cariBuku(judul, kumpulanJudul);
                             break;
                         case 3:
                             cout << "Masukkan penulis buku yang ingin dicari: ";
-                            cin >> penulis;
+                            cin.ignore();
+                            getline(cin, penulis);
                             cariBuku(penulis, kumpulanPenulis);
                             break;
                         case 4:
@@ -246,8 +337,86 @@ int main()
             } while (pilihan != 5);
             break;
         case 2:
-            cout << "Anda masuk sebagai Customer.\n\n";
+            cout << "Anda masuk sebagai Customer.\n";
             cout << "=============================================\n";
+            do
+            {
+                cout << "=============================================\n";
+                cout << "Silakan pilih menu yang tersedia:\n";
+                cout << "=============================================\n";
+                cout << "1. Cari buku\n";
+                cout << "2. Tambah barang ke keranjang\n";
+                cout << "3. Tampilkan isi keranjang\n";
+                cout << "4. Checkout\n";
+                cout << "5. Kembali\n";
+                cout << "Pilihan: ";
+                cin >> pilihan;
+                switch (pilihan)
+                {
+                case 1:
+                    do
+                    {
+                        cout << "=============================================\n";
+                        cout << "Cari buku berdasarkan: \n";
+                        cout << "1. Kategori\n";
+                        cout << "2. Judul\n";
+                        cout << "3. Penulis\n";
+                        cout << "4. Range Harga\n";
+                        cout << "5. Kembali\n";
+                        cout << "Pilihan: ";
+
+                        cin >> pilihanCari;
+                        switch (pilihanCari)
+                        {
+                        case 1:
+                            cout << "Masukkan kategori buku yang ingin dicari: ";
+                            cin >> kategori;
+                            cariBuku(kategori, kumpulanKategori);
+                            break;
+                        case 2:
+                            cout << "Masukkan judul buku yang ingin dicari: ";
+                            cin >> judul;
+                            cariBuku(judul, kumpulanJudul);
+                            break;
+                        case 3:
+                            cout << "Masukkan penulis buku yang ingin dicari: ";
+                            cin >> penulis;
+                            cariBuku(penulis, kumpulanPenulis);
+                            break;
+                        case 4:
+                            cout << "\n=============================================\n";
+                            cout << "Masukkan range harga buku yang ingin dicari: \n";
+                            cout << "\tHarga minimum: Rp ";
+                            cin >> hargaMin;
+                            cout << "\tHarga maksimum: Rp ";
+                            cin >> hargaMax;
+                            cariBukuHarga(stokbuku, hargaMin, hargaMax);
+                            break;
+                        default:
+                            cout << "Menu tidak tersedia!\n";
+                            break;
+                        }
+                    } while (pilihanCari != 5);
+                    break;
+                case 2:
+                    // Tambah barang ke keranjang
+                    tambahKeKeranjang(stokbuku, keranjang, kumpulanKategori, kumpulanPenulis, kumpulanJudul);
+                    break;
+                case 3:
+                    // Tampilkan isi keranjang
+                    tampilkanKeranjang(keranjang);
+                    break;
+                case 4:
+                    // Checkout
+                    checkout(keranjang);
+                    break;
+                case 5:
+                    // Kembali ke menu utama
+                    break;
+                default:
+                    cout << "Menu tidak tersedia";
+                }
+            } while (pilihan != 5);
             break;
         case 3:
             cout << "Terima kasih, sampai jumpa kembali!\n";
