@@ -1,5 +1,7 @@
 #include <iostream>
 #include <vector>
+#include <iomanip>
+#include <algorithm>
 #include <fstream>
 #include <string>
 #include <unordered_map>
@@ -37,7 +39,7 @@ void tambahBuku(vector<Buku> &stokbuku, unordered_map<string, vector<Buku>> &kum
 {
     if (!fromFile)
     {
-        cout << "=============================================\n";
+        cout << "-------------------------------------------------\n";
         cout << "Masukkan data buku yang ingin ditambahkan:\n";
         cout << "\tMasukkan kategori buku: ";
         cin >> buku.kategori;
@@ -56,7 +58,7 @@ void tambahBuku(vector<Buku> &stokbuku, unordered_map<string, vector<Buku>> &kum
         cin >> buku.stok;
 
         cout << "Buku berhasil ditambahkan!\n";
-        cout << "=============================================\n\n";
+        cout << "-------------------------------------------------\n\n";
     }
 
     stokbuku.push_back(buku);                                              // Menambahkan buku ke dalam vektor stokbuku
@@ -149,25 +151,67 @@ void checkout(vector<Keranjang> &keranjang)
 // Fungsi untuk mencari buku berdasarkan kategori atau penulis
 void cariBuku(string cari, unordered_map<string, vector<Buku>> &chain)
 {
-    if (chain.find(cari) != chain.end())
-    {
-        cout << "\nBuku ditemukan!\n";
-        cout << "=============================================\n";
-        for (auto &buku : chain[cari])
-        {
-            cout << "\tJudul: " << buku.judul << endl;
-            cout << "\tPenulis: " << buku.penulis << endl;
-            cout << "\tPenerbit: " << buku.penerbit << endl;
-            cout << "\tHarga: " << buku.harga << endl;
-            cout << "\tStok: " << buku.stok << endl;
-            cout << "=============================================\n";
+    bool found = false;
+
+    // Ubah string cari menjadi huruf kecil
+    transform(cari.begin(), cari.end(), cari.begin(), ::tolower);
+        cout << "+-------------------------------+--------------------+--------------------+-------+------+\n";
+        cout << "| " << setw(30) << left << "Judul"
+             << "| " << setw(19) << left << "Penulis"
+             << "| " << setw(19) << left << "Penerbit"
+             << "|" << setw(6) << left << "Harga"
+             << "| " << setw(6) << left << "Stok"
+             << "|\n";
+        cout << "+-------------------------------+--------------------+--------------------+-------+------+\n";
+
+    // Cek apakah kata kunci cocok dengan judul, penulis, atau kategori buku
+    for (const auto& pair : chain) {
+        for (const auto& buku : pair.second) {
+            string judul = buku.judul;
+            string penulis = buku.penulis;
+            string kategori = buku.kategori;
+
+            // Ubah string judul, penulis, dan kategori menjadi huruf kecil
+            transform(judul.begin(), judul.end(), judul.begin(), ::tolower);
+            transform(penulis.begin(), penulis.end(), penulis.begin(), ::tolower);
+            transform(kategori.begin(), kategori.end(), kategori.begin(), ::tolower);
+
+            if (judul.find(cari) != string::npos ||
+                penulis.find(cari) != string::npos ||
+                kategori.find(cari) != string::npos) {
+                found = true;
+                
+                // Memeriksa panjang judul, penulis, dan kategori
+                if (buku.judul.length() > 30) {
+                    cout << "| " << setw(30) << left << buku.judul.substr(0, 30) << "|\n";
+                    cout << "| " << setw(30) << left << buku.judul.substr(30) << "|";
+                } else {
+                    cout << "| " << setw(30) << left << buku.judul << "|";
+                }
+
+                if (buku.penulis.length() > 20) {
+                    cout << setw(20) << left << buku.penulis.substr(0, 20) << "|";
+                } else {
+                    cout << setw(20) << left << buku.penulis << "|";
+                }
+
+                if (buku.penerbit.length() > 20) {
+                    cout << setw(20) << left << buku.penerbit.substr(0, 20) << "|";
+                } else {
+                    cout << setw(20) << left << buku.penerbit << "|";
+                }
+
+                cout << setw(6) << left << buku.harga
+                     << "| " << setw(6) << left << buku.stok
+                     << "|\n";
+            }
         }
     }
-    else
-    {
+
+    if (!found) {
         cout << "Buku tidak ditemukan.\n";
     }
-    cout << "\n";
+    cout << "+-------------------------------+--------------------+--------------------+-------+------+\n\n";
 }
 
 // Fungsi untuk mencari buku berdasarkan range harga
@@ -178,20 +222,41 @@ void cariBukuHarga(const vector<Buku> &stokbuku, int hargaMin, int hargaMax)
     if (found == false)
     {
         cout << "\nBuku dengan harga antara Rp " << hargaMin << " sampai Rp " << hargaMax << " ditemukan!\n";
-        cout << "=============================================\n";
+        cout << "+-------------------------------+--------------------+--------------------+-------+------+\n";
+        cout << "| " << setw(30) << left << "Judul"
+             << "| " << setw(19) << left << "Penulis"
+             << "| " << setw(19) << left << "Penerbit"
+             << "|" << setw(6) << left << "Harga"
+             << "| " << setw(6) << left << "Stok"
+             << "|\n";
+        cout << "+-------------------------------+--------------------+--------------------+-------+------+\n";
+
         for (const auto &buku : stokbuku)
         {
             if (buku.harga >= hargaMin && buku.harga <= hargaMax)
             {
-                found = true;
-                cout << "\tKategori: " << buku.kategori << "\n";
-                cout << "\tGenre: " << buku.genre << "\n";
-                cout << "\tJudul: " << buku.judul << endl;
-                cout << "\tPenulis: " << buku.penulis << endl;
-                cout << "\tPenerbit: " << buku.penerbit << endl;
-                cout << "\tHarga: " << buku.harga << endl;
-                cout << "\tStok: " << buku.stok << endl;
-                cout << "=============================================\n";
+                if (buku.judul.length() > 30) {
+                cout << "| " << setw(30) << left << buku.judul.substr(0, 30) << "|\n";
+                cout << "| " << setw(30) << left << buku.judul.substr(30) << "|";
+            } else {
+                cout << "| " << setw(30) << left << buku.judul << "|";
+            }
+
+            if (buku.penulis.length() > 20) {
+                cout << setw(20) << left << buku.penulis.substr(0, 20) << "|";
+            } else {
+                cout << setw(20) << left << buku.penulis << "|";
+            }
+
+            if (buku.penerbit.length() > 20) {
+                cout << setw(20) << left << buku.penerbit.substr(0, 20) << "|";
+            } else {
+                cout << setw(20) << left << buku.penerbit << "|";
+            }
+
+            cout << setw(6) << left << buku.harga
+                 << "| " << setw(6) << left << buku.stok
+                 << "|\n";
             }
         }
         cout << "\n";
@@ -200,8 +265,8 @@ void cariBukuHarga(const vector<Buku> &stokbuku, int hargaMin, int hargaMax)
     else
     {
         cout << "Tidak ada buku dalam range harga tersebut.\n";
-        cout << "=============================================\n";
-    }
+    } 
+    cout << "+-------------------------------+--------------------+--------------------+-------+------+\n\n";
 }
 
 int main()
@@ -234,9 +299,9 @@ int main()
 
     do
     {
-        cout << "=============================================\n";
+        cout << "--------------------------------------------\n";
         cout << "Selamat datang di sistem manajemen stok buku\n";
-        cout << "=============================================\n";
+        cout << "--------------------------------------------\n";
         cout << "Masuk sebagai\n";
         cout << "1. Admin\n";
         cout << "2. Customer\n";
@@ -249,12 +314,10 @@ int main()
         {
         case 1:
             cout << "Anda masuk sebagai Admin.\n";
-            cout << "=============================================\n\n";
+            cout << "--------------------------------------------\n\n";
             do
             {
-                cout << "=============================================\n";
                 cout << "Silakan pilih menu yang tersedia:\n";
-                cout << "=============================================\n";
                 cout << "1. Tambah buku\n";                           // admin
                 cout << "2. Pembaruan stok buku setelah transaksi\n"; // admin, nambah stok
                 cout << "3. Cari buku\n";
@@ -279,7 +342,6 @@ int main()
                     // Cari buku
                     do
                     {
-                        cout << "=============================================\n";
                         cout << "Cari buku berdasarkan: \n";
                         cout << "1. Kategori\n";
                         cout << "2. Judul\n";
@@ -309,13 +371,14 @@ int main()
                             cariBuku(penulis, kumpulanPenulis);
                             break;
                         case 4:
-                            cout << "\n=============================================\n";
                             cout << "Masukkan range harga buku yang ingin dicari: \n";
                             cout << "\tHarga minimum: Rp ";
                             cin >> hargaMin;
                             cout << "\tHarga maksimum: Rp ";
                             cin >> hargaMax;
                             cariBukuHarga(stokbuku, hargaMin, hargaMax);
+                            break;
+                        case 5:
                             break;
                         default:
                             cout << "Menu tidak tersedia!\n";
@@ -338,12 +401,10 @@ int main()
             break;
         case 2:
             cout << "Anda masuk sebagai Customer.\n";
-            cout << "=============================================\n";
+            cout << "--------------------------------------------\n\n";
             do
             {
-                cout << "=============================================\n";
                 cout << "Silakan pilih menu yang tersedia:\n";
-                cout << "=============================================\n";
                 cout << "1. Cari buku\n";
                 cout << "2. Tambah barang ke keranjang\n";
                 cout << "3. Tampilkan isi keranjang\n";
@@ -356,7 +417,6 @@ int main()
                 case 1:
                     do
                     {
-                        cout << "=============================================\n";
                         cout << "Cari buku berdasarkan: \n";
                         cout << "1. Kategori\n";
                         cout << "2. Judul\n";
@@ -384,13 +444,15 @@ int main()
                             cariBuku(penulis, kumpulanPenulis);
                             break;
                         case 4:
-                            cout << "\n=============================================\n";
                             cout << "Masukkan range harga buku yang ingin dicari: \n";
                             cout << "\tHarga minimum: Rp ";
                             cin >> hargaMin;
                             cout << "\tHarga maksimum: Rp ";
                             cin >> hargaMax;
                             cariBukuHarga(stokbuku, hargaMin, hargaMax);
+                            break;
+                        case 5:
+                            cout << "\n";
                             break;
                         default:
                             cout << "Menu tidak tersedia!\n";
