@@ -106,7 +106,11 @@ void tambahKeKeranjang(vector<Buku> &stokbuku, vector<Keranjang> &keranjang, uno
 
     for (int i = 0; i < stokbuku.size(); i++)
     {
-        if (stokbuku[i].judul == judul)
+        // Agar tidak case sensitive
+        string judulLower = stokbuku[i].judul;
+        transform(judulLower.begin(), judulLower.end(), judulLower.begin(), ::tolower);
+
+        if (judulLower == judul)
         {
             if (stokbuku[i].stok >= jumlah)
             {
@@ -116,7 +120,7 @@ void tambahKeKeranjang(vector<Buku> &stokbuku, vector<Keranjang> &keranjang, uno
                 keranjang.push_back(k);
                 stokbuku[i].stok -= jumlah;
                 updateMap(kumpulanKategori, kumpulanPenulis, kumpulanJudul, stokbuku[i]);
-                cout << "Buku " << judul << " sebanyak " << jumlah << " buah berhasil ditambahkan ke keranjang!\n";
+                cout << "Buku " << stokbuku[i].judul << " sebanyak " << jumlah << " buah berhasil ditambahkan ke keranjang!\n";
             }
             else
             {
@@ -132,11 +136,22 @@ void tambahKeKeranjang(vector<Buku> &stokbuku, vector<Keranjang> &keranjang, uno
 // Fungsi untuk menampilkan isi keranjang
 void tampilkanKeranjang(vector<Keranjang> &keranjang)
 {
-    cout << "Isi Keranjang:\n";
+    cout << "+-------------------------------+-------+-------+\n";
+    cout << "| " << setw(30) << left << "Judul Buku"
+         << "| " << setw(6) << left << "Jumlah"
+         << "| " << setw(6) << left << "Harga"
+         << "|\n";
+    cout << "+-------------------------------+-------+-------+\n";
+
     for (int i = 0; i < keranjang.size(); i++)
     {
-        cout << i + 1 << ". " << keranjang[i].buku.judul << " (" << keranjang[i].jumlah << ")\n";
+        cout << "| " << setw(30) << left << keranjang[i].buku.judul
+             << "| " << setw(6) << left << keranjang[i].jumlah
+             << "| " << setw(6) << left << keranjang[i].buku.harga
+             << "|\n";
     }
+
+    cout << "+-------------------------------+-------+-------+\n";
 }
 
 // Fungsi untuk menambah stok buku
